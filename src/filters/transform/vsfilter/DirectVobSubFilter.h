@@ -116,6 +116,9 @@ public:
 	// IDirectVobSub2
 	STDMETHODIMP put_TextSettings(STSStyle* pDefStyle);
 
+  // IDSPlayerCustom
+  STDMETHODIMP SetPropertyPageCallback(HRESULT(*fpPropPageCallback)(IUnknown* pFilter));
+
     // ISpecifyPropertyPages
     STDMETHODIMP GetPages(CAUUID* pPages);
 
@@ -137,6 +140,8 @@ protected:
     HDC m_hdc;
     HBITMAP m_hbm;
     HFONT m_hfont;
+
+    HRESULT(*m_fpPropPageCallback)(IUnknown* pFilter) = nullptr;
     
 protected:
 	HRESULT ChangeMediaType(int iPosition);

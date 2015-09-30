@@ -30,6 +30,12 @@ typedef struct
     IDirectVobSub2* dvs;
     bool fRunOnce, fShowIcon;
     ATL::CEvent WndCreatedEvent;
+    HRESULT(*m_fpCustomOpenPropPage)(IUnknown* pFilter);
+    HRESULT SetCustomOpenPropPage(HRESULT(*fpCustomOpenPropPage)(IUnknown* pFilter))
+    {
+      m_fpCustomOpenPropPage = fpCustomOpenPropPage;
+      return S_OK;
+    }
 } SystrayIconData;
 
 extern DWORD CALLBACK SystrayThreadProc(void* pParam);
