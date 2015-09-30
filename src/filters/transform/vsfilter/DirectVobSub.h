@@ -27,7 +27,7 @@
 #include "version.h"
 #include "XyOptionsImpl.h"
 
-class DirectVobSubImpl : public IDirectVobSub2, public XyOptionsImpl, public IFilterVersion
+class DirectVobSubImpl : public IDirectVobSub2, public XyOptionsImpl, public IFilterVersion, public IDSPlayerCustom
 {
 public:
     typedef XyOptionsImpl::Option Option;
@@ -194,6 +194,9 @@ public:
     STDMETHODIMP put_TextSettings(STSStyle* pDefStyle);
 	STDMETHODIMP get_AspectRatioSettings(CSimpleTextSubtitle::EPARCompensationType* ePARCompensationType);
 	STDMETHODIMP put_AspectRatioSettings(CSimpleTextSubtitle::EPARCompensationType* ePARCompensationType);
+
+  // IDSPlayerCustom
+  STDMETHODIMP SetPropertyPageCallback(HRESULT(*fpPropPageCallback)(IUnknown* pFilter));
 
 	// IFilterVersion
 	

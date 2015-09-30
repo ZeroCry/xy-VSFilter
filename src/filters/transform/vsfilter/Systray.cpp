@@ -25,7 +25,7 @@
 #include "../../../DSUtil/DSUtil.h"
 
 // hWnd == INVALID_HANDLE_VALUE - get name, hWnd != INVALID_HANDLE_VALUE - show ppage
-static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd);
+static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd, SystrayIconData *tbid);
 
 static HHOOK g_hHook = (HHOOK)INVALID_HANDLE_VALUE;
 
@@ -225,12 +225,18 @@ LRESULT CSystrayWindow::OnNotifyIcon(WPARAM wParam, LPARAM lParam)
 		{
             if (!m_properties_page_showing)
             {
+              if (!m_tbid->m_fpCustomOpenPropPage) {
                 m_properties_page_showing = true;
                 RECT desktopRect;
                 ::GetWindowRect(::GetDesktopWindow(), &desktopRect);
                 ::SetWindowPos(m_hWnd, 0, (desktopRect.right / 2) - 200, (desktopRect.bottom / 2) - 300, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
                 ShowPPage(CComQIPtr<IBaseFilter>(m_tbid->dvs), hWnd);
-                m_properties_page_showing = false;
+              }
+              else
+              {
+                m_tbid->m_fpCustomOpenPropPage(CComQIPtr<IBaseFilter>(m_tbid->dvs));
+              }
+              m_properties_page_showing = false;
             }
             else
             {
@@ -299,7 +305,7 @@ LRESULT CSystrayWindow::OnNotifyIcon(WPARAM wParam, LPARAM lParam)
 			int i;
 
 			TCHAR* str;
-			for(i = 0; str = CallPPage(m_tbid->graph, i, (HWND)INVALID_HANDLE_VALUE); i++)
+      for (i = 0; str = CallPPage(m_tbid->graph, i, (HWND)INVALID_HANDLE_VALUE, m_tbid); i++)
 			{
 				if(_tcsncmp(str, _T("DivX MPEG"), 9) || m_tbid->fRunOnce) // divx3's ppage will crash if the graph hasn't been run at least once yet
 					popup.AppendMenu(MF_ENABLED|MF_STRING|MF_UNCHECKED, (1<<14)|(i), str);
@@ -325,7 +331,7 @@ LRESULT CSystrayWindow::OnNotifyIcon(WPARAM wParam, LPARAM lParam)
 						hWnd = hwnd;
 				}
 
-				CallPPage(m_tbid->graph, id&0xff, hWnd);
+        CallPPage(m_tbid->graph, id & 0xff, hWnd, m_tbid);
 			}
 		}
 		break; 
@@ -404,7 +410,7 @@ void DeleteSystray(HANDLE *pSystrayThread, SystrayIconData* data )
 // TODO: replace this function
 
 // hWnd == INVALID_HANDLE_VALUE - get name, hWnd != INVALID_HANDLE_VALUE - show ppage
-static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd)
+static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd, SystrayIconData *tbid)
 {
 	int i = 0;
 	//bool fFound = false;
@@ -437,7 +443,13 @@ static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd)
 	{
 		if(hWnd != INVALID_HANDLE_VALUE)
 		{
-			ShowPPage(pFilter, hWnd);
+      if (!tbid->m_fpCustomOpenPropPage) {
+        ShowPPage(pFilter, hWnd);
+      }
+      else
+      {
+        tbid->m_fpCustomOpenPropPage(pFilter);
+      }
 		}
 		else
 		{

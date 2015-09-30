@@ -109,6 +109,7 @@ XySubFilter::XySubFilter( LPUNKNOWN punk,
     m_tbid.hSystrayWnd = NULL;
     m_tbid.graph = NULL;
     m_tbid.fRunOnce = false;
+    m_tbid.m_fpCustomOpenPropPage = nullptr;
     m_tbid.fShowIcon = true;
 
     CacheManager::GetPathDataMruCache()->SetMaxItemNum(m_xy_int_opt[INT_PATH_DATA_CACHE_MAX_ITEM_NUM]);
@@ -158,6 +159,7 @@ STDMETHODIMP XySubFilter::NonDelegatingQueryInterface(REFIID riid, void** ppv)
     return
         QI(IDirectVobSub)
         QI(IDirectVobSub2)
+        QI(IDSPlayerCustom)
         QI(IXyOptions)
         QI(IFilterVersion)
         QI(ISpecifyPropertyPages)
@@ -769,6 +771,15 @@ STDMETHODIMP XySubFilter::put_TextSettings(STSStyle* pDefStyle)
     }
 
     return hr;
+}
+
+// IDSPlayerCustom
+STDMETHODIMP XySubFilter::SetPropertyPageCallback(HRESULT(*fpPropPageCallback)(IUnknown* pFilter))
+{
+  m_fpPropPageCallback = fpPropPageCallback;
+  if (m_hSystrayThread)
+    m_tbid.SetCustomOpenPropPage(fpPropPageCallback);
+  return S_OK;
 }
 
 STDMETHODIMP XySubFilter::put_AspectRatioSettings(CSimpleTextSubtitle::EPARCompensationType* ePARCompensationType)
@@ -2473,6 +2484,7 @@ HRESULT XySubFilter::FindAndConnectConsumer(IFilterGraph* pGraph)
                 m_tbid.dvs = this;
 
                 m_hSystrayThread = ::CreateSystray(&m_tbid);
+                m_tbid.SetCustomOpenPropPage(m_fpPropPageCallback);
                 XY_LOG_INFO("Systray thread created "<<m_hSystrayThread);
             }
         }
