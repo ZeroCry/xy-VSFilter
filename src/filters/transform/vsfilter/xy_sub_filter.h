@@ -67,6 +67,9 @@ public:
     STDMETHODIMP put_TextSettings(STSStyle* pDefStyle);
     STDMETHODIMP put_AspectRatioSettings(CSimpleTextSubtitle::EPARCompensationType* ePARCompensationType);
 
+    // IDSPlayerCustom
+    STDMETHODIMP SetPropertyPageCallback(HRESULT(*fpPropPageCallback)(IUnknown* pFilter));
+
     // ISpecifyPropertyPages
     STDMETHODIMP GetPages(CAUUID* pPages);
 
@@ -110,6 +113,8 @@ private:
 
     CStringW DumpProviderInfo();
     CStringW DumpConsumerInfo();
+
+    HRESULT(*m_fpPropPageCallback)(IUnknown* pFilter) = nullptr;
 private:
     class CFileReloaderData
     {

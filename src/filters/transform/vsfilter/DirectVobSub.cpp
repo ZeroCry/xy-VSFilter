@@ -622,6 +622,12 @@ STDMETHODIMP DirectVobSubImpl::AdviseSubClock(ISubClock* pSubClock)
 	return S_OK;
 }
 
+// IDSPlayerCustom
+STDMETHODIMP DirectVobSubImpl::SetPropertyPageCallback(HRESULT(*fpPropPageCallback)(IUnknown* pFilter))
+{
+  return S_OK;
+}
+
 STDMETHODIMP_(bool) DirectVobSubImpl::get_Forced()
 {
     bool forced = false;
