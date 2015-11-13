@@ -25,7 +25,7 @@
 #include "../../../DSUtil/DSUtil.h"
 
 // hWnd == INVALID_HANDLE_VALUE - get name, hWnd != INVALID_HANDLE_VALUE - show ppage
-static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd);
+static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd, SystrayIconData *tbid);
 
 static HHOOK g_hHook = (HHOOK)INVALID_HANDLE_VALUE;
 
@@ -231,7 +231,7 @@ LRESULT CSystrayWindow::OnNotifyIcon(WPARAM wParam, LPARAM lParam)
 			EndEnumFilters
 
 			if(pBF2)
-				ShowPPage(pBF2, hWnd);
+        m_tbid->m_fpCustomOpenPropPage ? m_tbid->m_fpCustomOpenPropPage(pBF2) : ShowPPage(pBF2, hWnd);
 		}
 		break;
 
@@ -295,7 +295,7 @@ LRESULT CSystrayWindow::OnNotifyIcon(WPARAM wParam, LPARAM lParam)
 			int i;
 
 			TCHAR* str;
-			for(i = 0; str = CallPPage(m_tbid->graph, i, (HWND)INVALID_HANDLE_VALUE); i++)
+      for (i = 0; str = CallPPage(m_tbid->graph, i, (HWND)INVALID_HANDLE_VALUE, m_tbid); i++)
 			{
 				if(_tcsncmp(str, _T("DivX MPEG"), 9) || m_tbid->fRunOnce) // divx3's ppage will crash if the graph hasn't been run at least once yet
 					popup.AppendMenu(MF_ENABLED|MF_STRING|MF_UNCHECKED, (1<<14)|(i), str);
@@ -321,7 +321,7 @@ LRESULT CSystrayWindow::OnNotifyIcon(WPARAM wParam, LPARAM lParam)
 						hWnd = hwnd;
 				}
 
-				CallPPage(m_tbid->graph, id&0xff, hWnd);
+        CallPPage(m_tbid->graph, id&0xff, hWnd, m_tbid);
 			}
 		}
 		break; 
@@ -358,7 +358,7 @@ DWORD CALLBACK SystrayThreadProc(void* pParam)
 // TODO: replace this function
 
 // hWnd == INVALID_HANDLE_VALUE - get name, hWnd != INVALID_HANDLE_VALUE - show ppage
-static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd)
+static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd, SystrayIconData *tbid)
 {
 	int i = 0;
 	//bool fFound = false;
@@ -391,7 +391,7 @@ static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd)
 	{
 		if(hWnd != INVALID_HANDLE_VALUE)
 		{
-			ShowPPage(pFilter, hWnd);
+      tbid->m_fpCustomOpenPropPage ? tbid->m_fpCustomOpenPropPage(pFilter) : ShowPPage(pFilter, hWnd);    
 		}
 		else
 		{

@@ -85,6 +85,7 @@ CDirectVobSubFilter::CDirectVobSubFilter(LPUNKNOWN punk, HRESULT* phr, const GUI
 	m_tbid.hSystrayWnd = NULL;
 	m_tbid.graph = NULL;
 	m_tbid.fRunOnce = false;
+  m_tbid.m_fpCustomOpenPropPage = nullptr;
 	m_tbid.fShowIcon = (theApp.m_AppName.Find(_T("zplayer"), 0) < 0 || !!theApp.GetProfileInt(ResStr(IDS_R_GENERAL), ResStr(IDS_RG_ENABLEZPICON), 0));
 
 	HRESULT hr = S_OK;
@@ -139,6 +140,7 @@ STDMETHODIMP CDirectVobSubFilter::NonDelegatingQueryInterface(REFIID riid, void*
     return
 		QI(IDirectVobSub)
 		QI(IDirectVobSub2)
+    QI(IDSPlayerCustom)
         QI(IDirectVobSubXy)
 		QI(IFilterVersion)
 		QI(ISpecifyPropertyPages)
@@ -590,6 +592,7 @@ HRESULT CDirectVobSubFilter::CompleteConnect(PIN_DIRECTION dir, IPin* pReceivePi
 
             DWORD tid;
             m_hSystrayThread = CreateThread(0, 0, SystrayThreadProc, &m_tbid, 0, &tid);
+            m_tbid.SetCustomOpenPropPage(m_fpPropPageCallback);
         }
         m_pInput->SetMediaType( &m_pInput->CurrentMediaType() );
     }
@@ -1374,6 +1377,16 @@ STDMETHODIMP CDirectVobSubFilter::put_AspectRatioSettings(CSimpleTextSubtitle::E
 	}
 
 	return hr;
+}
+
+// IDSPlayerCustom
+
+STDMETHODIMP CDirectVobSubFilter::SetPropertyPageCallback(HRESULT(*fpPropPageCallback)(IUnknown* pFilter))
+{
+  m_fpPropPageCallback = fpPropPageCallback;
+  if (m_hSystrayThread)
+    +m_tbid.SetCustomOpenPropPage(fpPropPageCallback);
+  return S_OK;
 }
 
 // IDirectVobSubFilterColor

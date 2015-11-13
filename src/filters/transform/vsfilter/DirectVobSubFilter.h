@@ -35,6 +35,12 @@ typedef struct
 	IFilterGraph* graph;
 	IDirectVobSub* dvs;
 	bool fRunOnce, fShowIcon;
+  HRESULT(*m_fpCustomOpenPropPage)(IUnknown* pFilter);
+  HRESULT SetCustomOpenPropPage(HRESULT(*fpCustomOpenPropPage)(IUnknown* pFilter))
+  {
+    m_fpCustomOpenPropPage = fpCustomOpenPropPage;
+    return S_OK;
+  }
 } SystrayIconData;
 
 /* This is for graphedit */
@@ -128,6 +134,9 @@ public:
 	STDMETHODIMP put_TextSettings(STSStyle* pDefStyle);
 	STDMETHODIMP put_AspectRatioSettings(CSimpleTextSubtitle::EPARCompensationType* ePARCompensationType);
 
+  // IDSPlayerCustom
+  STDMETHODIMP SetPropertyPageCallback(HRESULT(*fpPropPageCallback)(IUnknown* pFilter));
+
     // ISpecifyPropertyPages
     STDMETHODIMP GetPages(CAUUID* pPages);
 
@@ -149,6 +158,8 @@ protected:
     HDC m_hdc;
     HBITMAP m_hbm;
     HFONT m_hfont;
+
+    HRESULT(*m_fpPropPageCallback)(IUnknown* pFilter) = nullptr;
     
 protected:
 	HRESULT ChangeMediaType(int iPosition);

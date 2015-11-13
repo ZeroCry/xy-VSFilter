@@ -26,7 +26,7 @@
 #include "..\..\..\..\include\IFilterVersion.h"
 #include "version.h"
 
-class CDirectVobSub : public IDirectVobSub2, public IDirectVobSubXy, public IFilterVersion
+class CDirectVobSub : public IDirectVobSub2, public IDirectVobSubXy, public IFilterVersion, public IDSPlayerCustom
 {
 public:
     enum ColorSpaceOption
@@ -200,6 +200,10 @@ public:
     STDMETHODIMP put_TextSettings(STSStyle* pDefStyle);
 	STDMETHODIMP get_AspectRatioSettings(CSimpleTextSubtitle::EPARCompensationType* ePARCompensationType);
 	STDMETHODIMP put_AspectRatioSettings(CSimpleTextSubtitle::EPARCompensationType* ePARCompensationType);
+
+  // IDSPlayerCustom
+
+  STDMETHODIMP SetPropertyPageCallback(HRESULT(*fpPropPageCallback)(IUnknown* pFilter));
 
 	// IFilterVersion
 	

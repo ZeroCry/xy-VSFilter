@@ -956,6 +956,13 @@ STDMETHODIMP CDirectVobSub::put_AspectRatioSettings(CSimpleTextSubtitle::EPARCom
 	return S_OK;
 }
 
+// IDSPlayerCustom
+
+STDMETHODIMP CDirectVobSub::SetPropertyPageCallback(HRESULT(*fpPropPageCallback)(IUnknown* pFilter))
+{
+  return S_OK;
+}
+
 // IFilterVersion
 
 STDMETHODIMP_(DWORD) CDirectVobSub::GetFilterVersion()

@@ -310,3 +310,9 @@ public IDirectVobSub {
         ) PURE;
 };
 
+[uuid("716d5167-2140-4e99-bbc9-4248a1008990")]
+interface IDSPlayerCustom : public IUnknown
+{
+  // Set a custom callback function to handle the property page
+  STDMETHOD(SetPropertyPageCallback)(HRESULT(*fpPropPageCallback)(IUnknown* pFilter)) = 0;
+};
